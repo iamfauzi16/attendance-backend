@@ -23,6 +23,7 @@
                     </p>
                 </a>
             </li>
+            @if (auth()->user()->is_admin)
             <li class="nav-item">
                 <a href="{{ url('/attendance') }}" class="nav-link">
                     <i class="nav-icon far fa-calendar-alt"></i>
@@ -39,6 +40,24 @@
                     </p>
                 </a>
             </li>
+            @else
+            <li class="nav-item d-none">
+                <a href="{{ url('/attendance') }}" class="nav-link">
+                    <i class="nav-icon far fa-calendar-alt"></i>
+                    <p>
+                        Attendance
+                    </p>
+                </a>
+            </li>
+            <li class="nav-item d-none">
+                <a href="{{ url('/user') }}" class="nav-link">
+                    <i class="nav-icon fas fa-user"></i>
+                    <p>
+                        Users
+                    </p>
+                </a>
+            </li>
+            @endif
             <li class="nav-header">LABELS</li>
             <li class="nav-item">
                 <a href="{{ route('logout') }}" class="nav-link" onclick="event.preventDefault();
