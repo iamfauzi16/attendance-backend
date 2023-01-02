@@ -8,17 +8,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\UserResource;
 use Symfony\Component\HttpFoundation\Response;
+
 
 class AuthController extends Controller
 {
+
+    public function me(Request $request)
+    {
+        return new UserResource($request->user());
+    }
+
     public function register(Request $request)
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8'],
-            'device_name' => ['required']
+            
         ]);
 
         $data['password'] = Hash::make($request->password);
@@ -32,7 +40,7 @@ class AuthController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $accessToken = Auth::user()->createToken($request->device_name)->plainTextToken;
+        $accessToken = Auth::user()->createToken('web-token')->plainTextToken;
 
         return response()->json([
             'message' => 'success',
@@ -48,7 +56,6 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-            'device_name' => 'required',
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -59,20 +66,14 @@ class AuthController extends Controller
             ]);
         }
 
-        $accessToken = $user->createToken($request->device_name)->plainTextToken;
+        $accessToken = $user->createToken('web-token')->plainTextToken;
 
-        return response()->json([
-            'message' => 'success',
-            'data' => $user,
-            'meta' => [
-                'token' => $accessToken
-            ]
-        ], Response::HTTP_CREATED);
+        return (new UserResource($user))->additional(compact('accessToken'));
     }
 
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
+        $request->user()->tokens()->where('id', $request->user()->currentAccessToken()->id)->delete();
         return response()->json([
             'message' => 'log out success'
         ], Response::HTTP_OK);

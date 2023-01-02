@@ -14,9 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+
 
 Route::group(['prefix' => 'auth'], function () {
     Route::post('/register', 'Api\Auth\AuthController@register');
@@ -32,5 +30,6 @@ Route::group(['prefix' => 'auth'], function () {
 Route::group(['middleware'=>'auth:sanctum'], function(){
     Route::post('attendance', 'Api\AttendanceController@store');
     Route::get('attendance/history', 'Api\AttendanceController@history');
+    Route::get('me', 'Api\Auth\AuthController@me');
 });
 
